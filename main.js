@@ -4,55 +4,99 @@ function getRandomInt(min, max)
 }
 
 let N = getRandomInt(1,100);
-let N2 = getRandomInt(0,30); 
+let N2 = getRandomInt(1,100); 
+
+color = ["red", "green", "yellow"];
 
 
 let Apple = function(age,color,size){
   this.age = age;
   this.color = color;
   this.size = size;
-  this.rot = 0;
-  this.fall = 0;
+  this.rot = false;
+  this.fall = false;
+  this.ageFall = 0; 
 }
 
 Apple.prototype.fallDown = function(){
-   this.fall = 1;  
+   this.fall = true;  
 }
 
 Apple.prototype.rotOn = function(){
-   this.rot = 1;
+   this.rot = true;
 }
 
-Apple.prototype.fallStat = function() {
-  return this.fall;
-}
-
-let Garden = function(age,apples){
-  this.age = age; 
+let Tree = function(apples){
   this.apples = apples;
   this.applesArr = [];
+}
+
+Tree.prototype.createApples = function(){
+  if(this.applesArr.length < this.apples){
+    this.applesArr.push(new Apple(getRandomInt(0, 30),color[getRandomInt(0, 2)],getRandomInt(1, 4)));
+    this.createApples();
+  } 
+}
+
+Tree.prototype.newApple = function (){
+  this.apples += 1;
+  this.applesArr.push(new Apple(getRandomInt(0, 30),color[getRandomInt(0, 2)],getRandomInt(1, 4)));
+}
+
+
+let Garden = function(){
+  this.age = 0; 
+  this.trees = getRandomInt(0, 10);
+  this.treesArr = [];
+  this._createTrees();
 } 
 
 
-Garden.prototype.newApples = function(){
-  if(this.applesArr.length < this.apples){
-    this.applesArr.push(new Apple(getRandomInt(0, 30),"red",2));
-    this.newApples(getRandomInt(0, 30));
+Garden.prototype._createTrees = function(){
+  let count = 0;
+  while(this.treesArr.length < this.trees){
+    this.treesArr.push(new Tree(getRandomInt(1,10)));
+    this.treesArr[count].createApples();
+    count++;
   } 
 }
+
 Garden.prototype.day = function(){
   this.age+=1;
-  console.log("1 day gone");
+  this.treesArr.forEach(function(value,index,treesArr){
+    value.applesArr.forEach(function(value,index,applesArr){
+      value.age += 1;
+      if(value.fall == true){
+        if(value.ageFall == 0){
+          value.ageFall += 1;
+        }
+        if(value.ageFall == 1){
+          value.rotOn();
+        }
+      }
+      if(value.age > getRandomInt(28,32)){
+        value.fallDown();
+      }
+    })
+  })
+  if(this.age%30 == 0){
+    this.treesArr.forEach(function(value,index,treesArr){
+      value.newApple();
+    })
+  }
+  console.log(`one day passed`);
 }
 
 Garden.prototype.getCountApples = function(){
   let count = 0;
-  for(let i = 0;i<this.apples; i++){
-    count += this.applesArr[i].fallStat();
-  }
-  console.log(count);
+  this.treesArr.forEach(function(value,index,tressArr){
+    value.applesArr.forEach(function(value,index,applesArr){
+      if(value.fall == false){
+        count++;
+      }
+    })
+  })
+  console.log(`the number of apples on the trees ${count}`);
 } 
 
-garden1 = new Garden(N2,N);
-garden1.newApples();
 
